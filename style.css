@@ -43,7 +43,13 @@ nav a:hover { color: var(--fg); text-decoration: none; }
   margin-left: 8px; background: var(--card); color: var(--fg); border: 1px solid var(--line);
   border-radius: 999px; padding: 4px 12px; font: inherit; font-size: .85rem; cursor: pointer; white-space: nowrap;
 }
+.theme-btn { flex-shrink: 0; }
 .theme-btn:hover { border-color: var(--accent); }
+@media (max-width: 520px) {
+  nav .wrap { gap: 12px; font-size: .82rem; }
+  .theme-btn { margin-left: 0; padding: 4px 10px; }
+  .theme-btn .lbl { display: none; }
+}
 nav .brand { color: var(--fg); font-weight: 700; margin-right: auto; }
 
 .hero {

@@ -17,7 +17,7 @@
 <nav><div class="wrap">
   <a class="brand" href="#top"><span id="g">G</span>C</a>
   <a href="#work">Work</a><a href="#skills">Skills</a><a href="#experience">Experience</a><a href="#contact">Contact</a>
-  <button class="theme-btn" id="theme" type="button" aria-label="Switch colour theme">☀ Light</button>
+  <button class="theme-btn" id="theme" type="button" aria-label="Switch colour theme"><span aria-hidden="true">☀</span><span class="lbl"> Light</span></button>
 </div></nav>
 
 <header class="hero" id="top"><div class="wrap">
@@ -142,7 +142,7 @@
 <script>
 const btn = document.getElementById('theme');
 const root = document.documentElement;
-const sync = () => { btn.textContent = root.dataset.theme === 'light' ? '☾ Dark' : '☀ Light'; };
+const sync = () => { const l = root.dataset.theme === 'light'; btn.innerHTML = '<span aria-hidden="true">' + (l ? '☾' : '☀') + '</span><span class="lbl"> ' + (l ? 'Dark' : 'Light') + '</span>'; };
 sync();
 btn.addEventListener('click', () => {
   const next = root.dataset.theme === 'light' ? 'dark' : 'light';
