@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guilherme Correia – AI Engineer</title>
+  <meta name="description" content="Portfolio of Guilherme Correia: GenAI, agentic RAG and platform engineering.">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    try { if (localStorage.getItem('theme') === 'light') document.documentElement.dataset.theme = 'light'; } catch (e) {}
+  </script>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="#top">GC</a>
+  <a href="#work">Work</a><a href="#skills">Skills</a><a href="#experience">Experience</a><a href="#contact">Contact</a>
+  <button class="theme-btn" id="theme" type="button" aria-label="Switch colour theme">☀ Light</button>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <div class="eyebrow">AI Engineer · Lisbon, Portugal</div>
+  <h1>Hi, I'm <span>Guilherme Correia</span></h1>
+  <p class="tagline">I build and ship GenAI systems: agentic RAG, enterprise assistants and the cloud infrastructure underneath them.</p>
+  <div class="btns">
+    <a class="btn primary" href="#work">See my work</a>
+    <a class="btn" href="https://github.com/guicorreia97">GitHub</a>
+    <a class="btn" href="https://www.linkedin.com/in/guilherme-crespo-correia/">LinkedIn</a>
+    <a class="btn" href="mailto:guilherme_crespo_correia@outlook.com">Email</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <div class="stats reveal">
+    <div class="stat"><b>5,000+</b><span>users on an enterprise GenAI assistant I operated</span></div>
+    <div class="stat"><b>50%+</b><span>less manual triage from my JIRA automation</span></div>
+    <div class="stat"><b>2</b><span>multi-agent systems, one framework-based, one hand-built</span></div>
+    <div class="stat"><b>1st</b><span>SAP Hack2Build, Business AI</span></div>
+  </div>
+
+  <section>
+    <h2>About</h2>
+    <p>I build and deploy GenAI systems for enterprise and public-sector clients, with a background in
+    ServiceNow delivery and Python test automation. I care about the unglamorous parts: context
+    management, cost attribution, reusable infrastructure, and knowing when to adopt rather than build.
+    Client details below are anonymized.</p>
+  </section>
+
+  <section id="work">
+    <h2>Selected work</h2>
+    <div class="grid">
+
+      <article class="card reveal">
+        <h3>Agentic RAG for a public-sector corpus</h3>
+        <p class="role">Led the workstream: design, build, deployment</p>
+        <p>Dual-agent LangGraph system. An orchestrator holds the conversation and decides whether to
+        retrieve at all; a scoped retrieval sub-agent works from a narrower context, judges whether the
+        evidence is enough, and answers back through the orchestrator so its history stays complete.
+        Dockerized and deployed to the client's production and QA environments.</p>
+        <ul class="tags"><li>LangGraph</li><li>ChromaDB</li><li>Docker</li><li>On-prem VM</li></ul>
+      </article>
+
+      <article class="card reveal">
+        <h3>Enterprise GenAI assistant, 5,000+ users</h3>
+        <p class="role">Deployed and operated; built the governance layer</p>
+        <p>Firm-wide assistant so employees stop pasting sensitive material into public LLM tools,
+        based on a vendor accelerator. I built the nightly data-retention cleanup and a per-user token
+        accounting pipeline that feeds team-level usage and cost reporting.</p>
+        <ul class="tags"><li>Azure OpenAI</li><li>Azure Functions</li><li>CosmosDB</li><li>Azure DevOps</li></ul>
+      </article>
+
+      <article class="card reveal">
+        <h3>Reusable Terraform base for chatbot workloads</h3>
+        <p class="role">Infrastructure design and implementation</p>
+        <p>For a multi-agent funding-search chatbot on Azure, I wrote parameterised Terraform modules
+        (Container Apps, API gateway, container registry, Log Analytics / Application Insights) meant
+        as a base for standing up future chatbots by changing input variables.</p>
+        <ul class="tags"><li>Terraform</li><li>Azure Container Apps</li><li>Observability</li></ul>
+      </article>
+
+      <article class="card reveal">
+        <h3>Voice-enabled ServiceNow assistant</h3>
+        <p class="role">Led the workstream: agent architecture and integrations</p>
+        <p>Text and voice assistant for driving ServiceNow workflows. Multi-agent orchestration, slot
+        filling and conversational state were hand-built, with no agent framework, alongside the
+        ServiceNow REST integrations. Speech used NVIDIA NeMo models. Prototype stage.</p>
+        <ul class="tags"><li>Python</li><li>ServiceNow REST</li><li>NeMo ASR/TTS</li></ul>
+      </article>
+
+      <article class="card reveal">
+        <h3>Accounting advisor, SAP Hack2Build winner</h3>
+        <p class="role">Hackathon team: RAG logic</p>
+        <p>Prototype that maps transactions to ERP posting fields by retrieving over company accounting
+        guidelines, with vectors stored in SAP HANA Cloud's vector engine so retrieval is a SQL query.
+        Won the SAP Hack2Build hackathon for Business AI.</p>
+        <ul class="tags"><li>RAG</li><li>SAP HANA Cloud</li><li>Azure OpenAI</li></ul>
+      </article>
+
+      <article class="card reveal">
+        <h3>Automated JIRA issue reporting</h3>
+        <p class="role">Built alone, in continuous team use</p>
+        <p>Pipeline turning failed Android test results into JIRA issues, grouping related failures by
+        root cause so one cause produces one issue. Cut manual triage effort by over 50%.</p>
+        <ul class="tags"><li>Python</li><li>JIRA REST</li><li>TradeFed</li></ul>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="skills">
+    <h2>Skills</h2>
+    <dl class="skills">
+      <div class="reveal"><dt>GenAI</dt><dd>Agentic RAG, LangGraph, multi-agent design, Azure OpenAI, AWS Bedrock Agents, pgvector, ChromaDB</dd></div>
+      <div class="reveal"><dt>Cloud &amp; delivery</dt><dd>Azure (Container Apps, Functions, Web Apps, DevOps), Terraform, Docker, CI/CD</dd></div>
+      <div class="reveal"><dt>Engineering</dt><dd>Python, FastAPI, JavaScript, REST integrations</dd></div>
+    </dl>
+  </section>
+
+  <section id="experience">
+    <h2>Experience</h2>
+    <div class="timeline">
+      <div class="job reveal"><strong>Software Engineer, TechLisbon</strong><span class="when">Sep 2025 – Jul 2026</span><p>Android test automation and GAS certification for automotive clients (Volvo Cars, Volkswagen); Python tooling and JIRA automation.</p></div>
+      <div class="job reveal"><strong>AI Engineer, Deloitte</strong><span class="when">Jun 2023 – Sep 2025</span><p>GenAI platforms, agentic RAG and cloud infrastructure for enterprise and public-sector clients. Tech Consultant, promoted to Senior in Jun 2025.</p></div>
+      <div class="job reveal"><strong>Tech Analyst &amp; Consultant, Deloitte</strong><span class="when">Sep 2021 – Jun 2023</span><p>ServiceNow solution delivery for enterprise clients.</p></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <p><a href="mailto:guilherme_crespo_correia@outlook.com">guilherme_crespo_correia@outlook.com</a> ·
+    <a href="https://www.linkedin.com/in/guilherme-crespo-correia/">LinkedIn</a></p>
+  </section>
+</main>
+
+<footer><div class="wrap">© Guilherme Correia</div></footer>
+<script>
+const btn = document.getElementById('theme');
+const root = document.documentElement;
+const sync = () => { btn.textContent = root.dataset.theme === 'light' ? '☾ Dark' : '☀ Light'; };
+sync();
+btn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'light' ? 'dark' : 'light';
+  root.dataset.theme = next;
+  try { localStorage.setItem('theme', next); } catch (e) {}
+  sync();
+});
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
