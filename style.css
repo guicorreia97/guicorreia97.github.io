@@ -116,3 +116,18 @@ footer { padding: 48px 0; color: var(--muted); font-size: .85rem; }
   .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
+
+/* cursor trail */
+#trail { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; }
+main, header, footer { position: relative; z-index: 1; }
+
+/* easter egg */
+.toast {
+  position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 30px); opacity: 0; z-index: 60;
+  background: var(--card); border: 1px solid var(--accent); color: var(--fg);
+  padding: 12px 20px; border-radius: 14px; transition: all .4s; text-align: center; max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.confetti { position: fixed; top: -20px; z-index: 55; pointer-events: none; font-size: 22px; animation: fall linear forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(var(--rot)); } }
+.hint { opacity: .5; font-size: .75rem; margin-top: 6px; }
