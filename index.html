@@ -275,7 +275,7 @@ function startGame(viaCode) {
   const TOUCH_DX = 30, TOUCH_DY = 24;          // while dragging, the ship sits just ahead (right) and above the finger, so it stays visible
 
   // Bosses: the first is always the Core; later ones cycle through the others (each a bit tougher).
-  const GOAL = 5;   // TEMP for testing the goal card live. Real value: 20000 (the challenge offered after the first boss)
+  const GOAL = 10000;   // the challenge offered after the first boss: roughly the score after beating four bosses (each is 1000 points, and the next one spawns 1500 points after the last)
   const BOSSES = ['core', 'heavy', 'sweeper', 'charger'];  const BOSS_LOOK = { core: ['#3b4a78', '#1e2a52'], heavy: ['#7c3a3a', '#451a1a'], sweeper: ['#5b3a8a', '#2e1a4d'], charger: ['#1f6f6f', '#0f3a3a'] };
   const ebul = (x, y, a, v, r) => st.eb.push({ x, y, vx: Math.cos(a) * v * kS(), vy: Math.sin(a) * v * kS(), r: r || 3 });
   const bossAI = (f, dt) => {
@@ -309,7 +309,7 @@ function startGame(viaCode) {
 
   const newGame = () => {
     st = { mode: 'play', t: 0, scroll: 0, x: px0(), y: H / 2, lvl: 0, missile: false, dbl: false, laser: false, opts: 0, shield: 0, sel: -1,
-      bullets: [], foes: [], eb: [], caps: [], fx: [], hist: [], score: 0, lives: 1 /* TEMP test: die on the first hit. Real value: 3 */, inv: 2, fire: 0,
+      bullets: [], foes: [], eb: [], caps: [], fx: [], hist: [], score: 0, lives: 3, inv: 2, fire: 0,
       wave: 1.2, garun: 4, waveN: 0, boss: null, bossAt: 1500, bossN: 0, cheat: false, banner: 0, congrats: false };
     panel.style.display = 'none';
     kpos = 0;
@@ -422,7 +422,7 @@ function startGame(viaCode) {
   // Share the game: a link that opens it straight on the title screen (?play). Native share sheet, then clipboard, then legacy copy.
   async function shareGame(b) {
     const url = location.href.split(/[?#]/)[0] + '?play';
-    const data = { title: 'GC-RADIUS', text: 'I just got past ' + GOAL.toLocaleString('en-US') + ' points in GC-RADIUS, a Gradius-style game hidden in a portfolio. Can you beat it?', url };
+    const data = { title: 'GC-RADIUS', text: 'I just scored ' + st.score.toLocaleString('en-US') + ' points in GC-RADIUS, a Gradius-style game hidden in a portfolio. Can you beat it?', url };
     const old = b.textContent, flash = msg => { b.textContent = msg; setTimeout(() => { b.textContent = old; }, 2200); };
     try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(url); return flash('LINK COPIED'); } } catch (e) {}
