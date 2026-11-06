@@ -180,3 +180,5 @@ button.btn { font: inherit; cursor: pointer; }
   .logo[aria-hidden="true"] { display: none; }
   .logo { margin-bottom: 12px; }
 }
+
+h2 .note { color: color-mix(in srgb, var(--muted) 55%, var(--bg)); font-weight: 400; font-size: .7em; white-space: nowrap; }
