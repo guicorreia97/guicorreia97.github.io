@@ -135,3 +135,48 @@ main, header, footer { position: relative; z-index: 1; }
 .confetti { position: fixed; top: -20px; z-index: 55; pointer-events: none; font-size: 22px; animation: fall linear forwards; }
 @keyframes fall { to { transform: translateY(110vh) rotate(var(--rot)); } }
 .hint { opacity: .5; font-size: .75rem; margin-top: 6px; }
+
+button.btn { font: inherit; cursor: pointer; }
+.dock { display: none; }
+@media (max-width: 700px) {
+  .dock {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 15;
+    background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); gap: 6px;
+  }
+  .dock a, .dock button {
+    flex: 1; min-height: 46px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px; color: var(--fg);
+    font: inherit; font-size: 1rem; line-height: 1.1; text-decoration: none; cursor: pointer;
+  }
+  .dock span { font-size: .68rem; color: var(--muted); margin-top: 2px; }
+  body { padding-bottom: 72px; }
+  .toast { bottom: 86px; }
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.chips li {
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 18px; font-weight: 600; transition: border-color .2s, transform .2s;
+}
+.chips li:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+/* clients marquee: slides left to right */
+.marquee { overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.track { display: flex; width: max-content; animation: slide 32s linear infinite; }
+.marquee:hover .track { animation-play-state: paused; }
+@keyframes slide { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.logo {
+  display: flex; align-items: center; justify-content: center; flex: none;
+  height: 70px; margin-right: 56px; /* the box is only as wide as the logo itself, so the gap is the same between any two logos */
+}
+/* single-colour logos that follow the theme: white on dark, black on light */
+.logo img[hidden] { display: none; }
+.logo img { height: 46px; width: auto; max-width: 200px; object-fit: contain; display: block; } /* width follows each logo's own proportions */
+.logo.textonly { color: var(--fg); font-weight: 700; font-size: 1.1rem; white-space: nowrap; opacity: .85; }
+@media (prefers-reduced-motion: reduce) {
+  .track { animation: none; flex-wrap: wrap; width: auto; }
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+  .logo[aria-hidden="true"] { display: none; }
+  .logo { margin-bottom: 12px; }
+}

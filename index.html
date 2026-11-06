@@ -23,7 +23,7 @@
 <header class="hero" id="top"><div class="wrap">
   <div class="eyebrow">AI Engineer · Lisbon, Portugal</div>
   <h1>Hi, I'm <span>Guilherme Correia</span></h1>
-  <p class="tagline">I build and ship GenAI systems: agentic RAG, enterprise assistants and the cloud infrastructure underneath them.</p>
+  <p class="tagline">I build GenAI systems and process automation: enterprise assistants, agentic RAG, and tools that remove manual work.</p>
   <div class="btns">
     <a class="btn primary" href="#work">See my work</a>
     <a class="btn" href="https://github.com/guicorreia97">GitHub</a>
@@ -34,20 +34,20 @@
 
 <main class="wrap">
   <div class="stats reveal">
-    <div class="stat"><b>5,000+</b><span>users on an enterprise GenAI assistant I operated</span></div>
-    <div class="stat"><b>50%+</b><span>less manual triage from my JIRA automation</span></div>
-    <div class="stat"><b>2</b><span>multi-agent systems, one framework-based, one hand-built</span></div>
-    <div class="stat"><b>1st</b><span>SAP Hack2Build, Business AI</span></div>
+    <div class="stat"><b>5,000+</b><span>Users</span></div>
+    <div class="stat"><b>50%+</b><span>less manual work sorting test failures, by automating bug reports</span></div>
+    <div class="stat"><b>5+</b><span>Years in software engineering</span></div>
+    <div class="stat"><b>1st</b><span>SAP's Hack2Build hackathon for business AI</span></div>
   </div>
 
   <section>
     <h2>About</h2>
-    <p>I'm a software engineer who moved into GenAI. I started in enterprise software delivery on
-    ServiceNow, spent two years building and deploying GenAI systems at Deloitte for enterprise and
-    public-sector clients, and most recently built Python automation and tooling for Android platform
-    testing at automotive clients.</p>
-    <p>I care about the unglamorous parts: context management, cost attribution, reusable
-    infrastructure, and knowing when to adopt rather than build. Client details below are anonymized.</p>
+    <p>I'm a software engineer who moved into AI. I started delivering ServiceNow solutions for large
+    companies, then spent two years at Deloitte building and launching AI systems for company and
+    public-sector clients. Most recently I built Python automation for Android Automotive testing.</p>
+    <p>I care about the less glamorous parts: controlling what the AI knows at each step, tracking what it
+    costs, building things other teams can reuse, and knowing when to use an existing tool instead of
+    building one. Project details are kept general.</p>
   </section>
 
   <section id="work">
@@ -55,57 +55,45 @@
     <div class="grid">
 
       <article class="card reveal">
-        <h3>Agentic RAG for a public-sector corpus</h3>
-        <p class="role">Led the workstream: design, build, deployment</p>
-        <p>Dual-agent LangGraph system. An orchestrator holds the conversation and decides whether to
-        retrieve at all; a scoped retrieval sub-agent works from a narrower context, judges whether the
-        evidence is enough, and answers back through the orchestrator so its history stays complete.
-        Dockerized and deployed to the client's production and QA environments.</p>
+        <h3>AI assistant that searches public-sector documents</h3>
+        <p class="role">Led the project: design, build, launch</p>
+        <p>Two AI agents working together. A main agent talks to the user and decides whether a question needs a document search at all. A second agent does the searching with only the information it needs, checks whether what it found is enough to answer, and hands the result back through the main agent so the conversation stays complete. Packaged with Docker and running on the client's live and test servers.</p>
         <ul class="tags"><li>LangGraph</li><li>ChromaDB</li><li>Docker</li><li>On-prem VM</li></ul>
       </article>
 
       <article class="card reveal">
-        <h3>Enterprise GenAI assistant, 5,000+ users</h3>
-        <p class="role">Deployed and operated; built the governance layer</p>
-        <p>Firm-wide assistant so employees stop pasting sensitive material into public LLM tools,
-        based on a vendor accelerator. I built the nightly data-retention cleanup and a per-user token
-        accounting pipeline that feeds team-level usage and cost reporting.</p>
+        <h3>Company-wide AI assistant, 5,000+ users</h3>
+        <p class="role">Set it up and ran it; built the data-control layer</p>
+        <p>An assistant so employees stop pasting sensitive information into public AI tools, based on Microsoft's Azure Chat Solution Accelerator. I built the nightly cleanup that deletes old chats and uploaded files, and a system that counts each person's AI usage so teams could see their usage and costs.</p>
         <ul class="tags"><li>Azure OpenAI</li><li>Azure Functions</li><li>CosmosDB</li><li>Azure DevOps</li></ul>
       </article>
 
       <article class="card reveal">
-        <h3>Reusable Terraform base for chatbot workloads</h3>
+        <h3>Reusable cloud setup for chatbots</h3>
         <p class="role">Infrastructure design and implementation</p>
-        <p>For a multi-agent funding-search chatbot on Azure, I wrote parameterised Terraform modules
-        (Container Apps, API gateway, container registry, Log Analytics / Application Insights) meant
-        as a base for standing up future chatbots by changing input variables.</p>
+        <p>For a funding-search chatbot on Azure, I wrote the Terraform code that sets up the hosting, image storage, gateway and monitoring. It works as a template: change a few settings and the same setup serves a new chatbot.</p>
         <ul class="tags"><li>Terraform</li><li>Azure Container Apps</li><li>Observability</li></ul>
       </article>
 
       <article class="card reveal">
-        <h3>Voice-enabled ServiceNow assistant</h3>
-        <p class="role">Led the workstream: agent architecture and integrations</p>
-        <p>Text and voice assistant for driving ServiceNow workflows. Multi-agent orchestration, slot
-        filling and conversational state were hand-built, with no agent framework, alongside the
-        ServiceNow REST integrations. Speech used NVIDIA NeMo models. Prototype stage.</p>
+        <h3>Voice assistant for ServiceNow</h3>
+        <p class="role">Led the project: agent design and integrations</p>
+        <p>Lets factory-floor staff run ServiceNow tasks by typing or speaking. I built the system that coordinates several AI agents from scratch, without a framework, including tracking where the conversation stands and asking for missing details, plus the connections to ServiceNow. Speech used NVIDIA models. Prototype only.</p>
         <ul class="tags"><li>Python</li><li>ServiceNow REST</li><li>NeMo ASR/TTS</li></ul>
       </article>
 
       <article class="card reveal">
-        <h3>Accounting advisor, SAP Hack2Build winner</h3>
-        <p class="role">Hackathon team: RAG logic</p>
-        <p>Prototype that maps transactions to ERP posting fields by retrieving over company accounting
-        guidelines, with vectors stored in SAP HANA Cloud's vector engine so retrieval is a SQL query.
-        Won the SAP Hack2Build hackathon for Business AI.</p>
+        <h3>Accounting assistant, SAP Hack2Build winner</h3>
+        <p class="role">Hackathon team: the document-lookup logic</p>
+        <p>Prototype that suggests how to record a transaction in a company's accounting system by looking up that company's own accounting guidelines. The guidelines lived in SAP's database with its built-in search-by-meaning feature, so no separate search tool was needed. Won the SAP Hack2Build hackathon for business AI.</p>
         <ul class="tags"><li>RAG</li><li>SAP HANA Cloud</li><li>Azure OpenAI</li></ul>
       </article>
 
       <article class="card reveal">
-        <h3>Automated JIRA issue reporting</h3>
+        <h3>Automated JIRA issue creation</h3>
         <p class="role">Built alone, in continuous team use</p>
-        <p>Pipeline turning failed Android test results into JIRA issues, grouping related failures by
-        root cause so one cause produces one issue. Cut manual triage effort by over 50%.</p>
-        <ul class="tags"><li>Python</li><li>JIRA REST</li><li>TradeFed</li></ul>
+        <p>Python web app that automates opening JIRA issues from failed Android test results. It fills in the fields automatically and groups failures with the same cause into a single issue. Cut the manual work of sorting failures by over 50%.</p>
+        <ul class="tags"><li>Python</li><li>Web app</li><li>JIRA REST</li><li>TradeFed</li></ul>
       </article>
 
     </div>
@@ -123,9 +111,9 @@
   <section id="experience">
     <h2>Experience</h2>
     <div class="timeline">
-      <div class="job reveal"><strong>Software Engineer, TechLisbon</strong><span class="when">Sep 2025 – Jul 2026</span><p>Android test automation and GAS certification for automotive clients (Volvo Cars, Volkswagen); Python tooling and JIRA automation.</p></div>
-      <div class="job reveal"><strong>AI Engineer, Deloitte</strong><span class="when">Jun 2023 – Sep 2025</span><p>GenAI platforms, agentic RAG and cloud infrastructure for enterprise and public-sector clients. Tech Consultant, promoted to Senior in Jun 2025.</p></div>
-      <div class="job reveal"><strong>Tech Analyst &amp; Consultant, Deloitte</strong><span class="when">Sep 2021 – Jun 2023</span><p>ServiceNow solution delivery for enterprise clients.</p></div>
+      <div class="job reveal"><strong>Software Engineer, TechLisbon</strong><span class="when">Sep 2025 – Jul 2026</span><p>Automated Android testing and Google Automotive Services certification for car makers (Volvo Cars, Volkswagen); Python tools, including a web app that automates opening JIRA issues.</p></div>
+      <div class="job reveal"><strong>AI Engineer, Deloitte</strong><span class="when">Jun 2023 – Sep 2025</span><p>AI assistants, document-search systems and cloud setups for company and public-sector clients. Tech Consultant, promoted to Senior in Jun 2025.</p></div>
+      <div class="job reveal"><strong>Tech Analyst &amp; Consultant, Deloitte</strong><span class="when">Sep 2021 – Jun 2023</span><p>Delivered ServiceNow solutions for large companies.</p></div>
     </div>
   </section>
 
@@ -133,12 +121,73 @@
     <h2>Contact</h2>
     <p><a href="mailto:guilherme_crespo_correia@outlook.com">guilherme_crespo_correia@outlook.com</a> ·
     <a href="https://www.linkedin.com/in/guilherme-crespo-correia/">LinkedIn</a></p>
+    <div class="btns">
+      <a class="btn" href="Guilherme_Correia.vcf">⬇ Save my contact</a>
+      <button class="btn" type="button" data-share>↗ Share this site</button>
+    </div>
+  </section>
+
+  <section id="clients">
+    <h2>Clients I've worked with</h2>
+    <ul class="chips reveal" id="clientlist">
+      <li>Deloitte</li><li>Volkswagen</li><li>Volvo Cars</li><li>European Commission</li><li>EDP</li><li>Worten</li>
+    </ul>
   </section>
 </main>
 
 <footer><div class="wrap">© Guilherme Correia<div class="hint">psst: tap the GC in the top-left 5 times. Or, if you know the code, ↑ ↑ ↓ ↓ ← → ← → B A</div></div></footer>
 <div class="toast" id="toast" role="status"></div>
+<div class="dock" aria-label="Quick contact">
+  <a href="mailto:guilherme_crespo_correia@outlook.com">✉<span>Email</span></a>
+  <a href="https://www.linkedin.com/in/guilherme-crespo-correia/" target="_blank" rel="noopener">in<span>LinkedIn</span></a>
+  <a href="Guilherme_Correia.vcf">⬇<span>Save</span></a>
+  <button type="button" data-share>↗<span>Share</span></button>
+</div>
 <script>
+document.querySelectorAll('[data-share]').forEach(b => b.addEventListener('click', async () => {
+  const data = { title: 'Guilherme Correia, AI Engineer', text: 'Portfolio of Guilherme Correia', url: location.href.split('#')[0] };
+  const flash = msg => { const old = b.innerHTML; b.innerHTML = msg; setTimeout(() => b.innerHTML = old, 2200); };
+  try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+  try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(data.url); return flash('✓ <span>Link copied</span>'); } } catch (e) {}
+  try { // legacy copy works on plain http
+    const ta = document.createElement('textarea'); ta.value = data.url; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove();
+    if (ok) return flash('✓ <span>Link copied</span>');
+  } catch (e) {}
+  flash('<span>' + data.url + '</span>');
+}));
+// Clients: a looping strip, sliding left to right, built from the list above.
+// Logo files live in /logos/. The suffix describes the COLOUR of the logo file. Per client the page picks, in order:
+//   1. dark mode: <name>_light.*  /  light mode: <name>_dark.*   2. <name>.*   3. the other variant's file
+//   4. the client's name as text. Extensions tried: svg, png, webp, jpg.
+// The chosen file is shown exactly as saved: no colour changes.
+(function () {
+  const list = document.getElementById('clientlist');
+  const names = [...list.children].map(li => li.textContent.trim());
+  const exts = ['svg', 'png', 'webp', 'jpg'];
+  const want = () => document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'; // logo colour that is visible on the current mode
+  const opposite = () => want() === 'dark' ? 'light' : 'dark';
+  const tile = name => {
+    const d = document.createElement('div'); d.className = 'logo';
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), img = new Image();
+    img.alt = name; d.appendChild(img);
+    const load = () => {
+      const tries = [...exts.map(e => slug + '_' + want() + '.' + e), ...exts.map(e => slug + '.' + e), ...exts.map(e => slug + '_' + opposite() + '.' + e)];
+      let i = 0; d.classList.remove('textonly'); img.hidden = false; d.lastChild !== img && (d.textContent = '', d.appendChild(img));
+      const next = () => {
+        if (i >= tries.length) { img.hidden = true; d.classList.add('textonly'); d.append(name); return; }
+        img.src = 'logos/' + tries[i++];
+      };
+      img.onerror = next; next();
+    };
+    load(); document.addEventListener('themechange', load); return d;
+  };
+  const track = document.createElement('div'); track.className = 'track';
+  for (let copy = 0; copy < 2; copy++) names.forEach(n => { const t = tile(n); if (copy) t.setAttribute('aria-hidden', 'true'); track.appendChild(t); });
+  const box = document.createElement('div'); box.className = 'marquee reveal';
+  box.setAttribute('role', 'list'); box.setAttribute('aria-label', "Clients I've worked with: " + names.join(', '));
+  box.appendChild(track); list.replaceWith(box);
+})();
 const btn = document.getElementById('theme');
 const root = document.documentElement;
 const sync = () => { const l = root.dataset.theme === 'light'; btn.innerHTML = '<span aria-hidden="true">' + (l ? '☾' : '☀') + '</span><span class="lbl"> ' + (l ? 'Dark' : 'Light') + '</span>'; };
@@ -146,6 +195,7 @@ sync();
 btn.addEventListener('click', () => {
   const next = root.dataset.theme === 'light' ? 'dark' : 'light';
   root.dataset.theme = next;
+  document.dispatchEvent(new Event('themechange'));
   try { localStorage.setItem('theme', next); } catch (e) {}
   sync();
 });
