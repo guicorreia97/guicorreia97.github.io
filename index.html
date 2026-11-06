@@ -266,14 +266,52 @@ function startGame(viaCode) {
   const stars = Array.from({ length: 90 }, () => ({ x: Math.random() * 2000, y: Math.random() * 1200, z: Math.random() }));
   const keys = {};
   let st = { mode: 'title', t: 0, scroll: 0 };
-  let touchT = null, raf, meterBox = null, kpos = 0, withCheat = false;
+  let touchT = null, meterTouch = false, raf, meterBox = null, kpos = 0, withCheat = false;
   const KCODE = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
   const rnd = (a, b) => a + Math.random() * (b - a);
+  // Small screens: enemies and their bullets slow down with the width (full speed from 900px up), so reaction time stays fair.
+  const kS = () => Math.min(1, Math.max(0.55, W / 900));
+  const px0 = () => W < 600 ? 60 : 90;         // ship's start column; a bit further left on phones to leave room before the boss
+  const TOUCH_DX = 30, TOUCH_DY = 24;          // while dragging, the ship sits just ahead (right) and above the finger, so it stays visible
+
+  // Bosses: the first is always the Core; later ones cycle through the others (each a bit tougher).
+  const GOAL = 20000;   // the challenge offered after the first boss
+  const BOSSES = ['core', 'heavy', 'sweeper', 'charger'];  const BOSS_LOOK = { core: ['#3b4a78', '#1e2a52'], heavy: ['#7c3a3a', '#451a1a'], sweeper: ['#5b3a8a', '#2e1a4d'], charger: ['#1f6f6f', '#0f3a3a'] };
+  const ebul = (x, y, a, v, r) => st.eb.push({ x, y, vx: Math.cos(a) * v * kS(), vy: Math.sin(a) * v * kS(), r: r || 3 });
+  const bossAI = (f, dt) => {
+    const s = st, home = W < 600 ? W - 100 : W - 170, toP = () => Math.atan2(s.y - f.y, s.x - f.x), sway = (sp) => { f.ph += dt * sp; f.y = H / 2 - 20 + Math.sin(f.ph * 0.9) * (H / 2 - 150); };
+    if (f.x > home && f.mode !== 'dash' && f.mode !== 'ret') { f.x -= 90 * kS() * dt; return; }
+    f.sh -= dt; f.cyc += dt;
+    if (f.kind === 'core') {
+      sway(1);
+      if (f.sh <= 0) { f.sh = 1.2; for (const da of [-0.3, 0, 0.3]) ebul(f.x - 40, f.y, toP() + da, 260); }
+    } else if (f.kind === 'heavy') {           // slow, big bullets in a wide fan
+      sway(0.6);
+      if (f.sh <= 0) { f.sh = 2; for (const da of [-0.5, -0.25, 0, 0.25, 0.5]) ebul(f.x - 40, f.y, toP() + da, 150, 9); }
+    } else if (f.kind === 'sweeper') {         // two arms of bullets sweeping up and down, then a pause
+      sway(0.8);
+      if ((f.cyc % 4.5) < 3.3 && f.sh <= 0) { f.sh = 0.1; const a = Math.sin(f.cyc * 1.8) * 0.9; ebul(f.x - 40, f.y, Math.PI + a, 200); ebul(f.x - 40, f.y, Math.PI - a, 200); }
+    } else {                                   // charger: aim, telegraph, dash across the screen, return
+      if (f.mode === 'idle') {
+        const y0 = f.y; sway(1); f.y = y0 + Math.max(-220 * dt, Math.min(220 * dt, f.y - y0));   // glide back onto the sway line, don't snap
+        if (f.sh <= 0) { f.sh = 0.9; ebul(f.x - 40, f.y, toP(), 240); }
+        f.t -= dt; if (f.t <= 0) { f.mode = 'warn'; f.t = 0.9; }
+      } else if (f.mode === 'warn') {
+        f.y += (s.y - f.y) * Math.min(1, dt * 5);
+        f.t -= dt; if (f.t <= 0) f.mode = 'dash';
+      } else if (f.mode === 'dash') {
+        f.x -= 760 * kS() * dt; if (f.x < 40) f.mode = 'ret';
+      } else {
+        f.x += 260 * kS() * dt; if (f.x >= home) { f.x = home; f.mode = 'idle'; f.t = 2.4; f.sh = 0.5; }
+      }
+    }
+  };
 
   const newGame = () => {
-    st = { mode: 'play', t: 0, scroll: 0, x: 90, y: H / 2, lvl: 0, missile: false, dbl: false, laser: false, opts: 0, shield: 0, sel: -1,
+    st = { mode: 'play', t: 0, scroll: 0, x: px0(), y: H / 2, lvl: 0, missile: false, dbl: false, laser: false, opts: 0, shield: 0, sel: -1,
       bullets: [], foes: [], eb: [], caps: [], fx: [], hist: [], score: 0, lives: 3, inv: 2, fire: 0,
       wave: 1.2, garun: 4, waveN: 0, boss: null, bossAt: 1500, bossN: 0, cheat: false, banner: 0, congrats: false };
+    panel.style.display = 'none';
     kpos = 0;
     if (withCheat) konami();
   };
@@ -295,8 +333,10 @@ function startGame(viaCode) {
     if (s.shield > 0) { s.shield--; s.inv = 0.6; boom(s.x + 24, s.y, 8); return; }
     boom(s.x, s.y, 40, true); s.lives--;
     s.lvl = 0; s.missile = s.dbl = s.laser = false; s.opts = 0; s.sel = -1; s.cheat = false;
-    if (s.lives <= 0) { s.mode = 'over'; if (s.score > best) { best = s.score; try { localStorage.setItem('gcradius-best', best); } catch (e) {} } }
-    else { s.x = 90; s.y = H / 2; s.inv = 2.4; s.eb = []; }
+    if (s.lives <= 0) { s.mode = 'over'; if (s.score > best) { best = s.score; try { localStorage.setItem('gcradius-best', best); } catch (e) {} }
+      if (s.score >= GOAL) setTimeout(() => { if (st === s && st.mode === 'over') showGoalOver(); }, 900);   // goal beaten: show the card after the explosion
+    }
+    else { s.x = px0(); s.y = H / 2; s.inv = 2.4; s.eb = []; }
   };
   const optPos = () => { const o = []; for (let i = 0; i < st.opts; i++) { const h = st.hist[Math.min((i + 1) * 9, st.hist.length - 1)]; if (h) o.push(h); } return o; };
   const shoot = () => {
@@ -347,12 +387,13 @@ function startGame(viaCode) {
     if (e.type === 'touchstart') {
       if (st.mode === 'title') withCheat = false;
       if (st.mode === 'title' || st.mode === 'over') return newGame();
-      if (meterBox && t.clientY > meterBox.y - 10) { act(); return; }
+      meterTouch = !!(meterBox && t.clientY > meterBox.y - 10);   // a touch that starts on the meter only buys the upgrade
+      if (meterTouch) { act(); return; }
     }
-    if (meterBox && t.clientY > meterBox.y - 10) return;
-    touchT = { x: t.clientX, y: t.clientY - 60 };
+    if (meterTouch) return;
+    touchT = { x: t.clientX, y: t.clientY };   // a drag may cross the meter: the ship can reach the very bottom
   };
-  const te = () => { touchT = null; };
+  const te = () => { touchT = null; meterTouch = false; };
   addEventListener('keydown', down); addEventListener('keyup', up);
   ov.addEventListener('touchstart', tm, { passive: false }); ov.addEventListener('touchmove', tm, { passive: false });
   ov.addEventListener('touchend', te);
@@ -373,12 +414,45 @@ function startGame(viaCode) {
 
   const EMAIL = 'mailto:guilherme_crespo_correia@outlook.com', LINKEDIN = 'https://www.linkedin.com/in/guilherme-crespo-correia/';
   const BTN = 'display:inline-block;margin:6px;padding:10px 14px;border:2px solid #6d8cff;background:#14246b;color:#fff;font:10px ' + FONT + ';text-decoration:none;cursor:pointer';
-  const BTN1 = BTN.replace('#14246b', '#f97316').replace('#6d8cff', '#fff');
+  // Primary button: same look as the selected SPEED UP slot (orange, white border). `font:inherit` is needed because <button> does not
+  // inherit the panel's pixel font by default (and BTN's own font declaration is cut off by the quotes in FONT inside the style attribute).
+  const BTN1 = 'display:inline-block;margin:6px;padding:8px 12px;border:2px solid #fff;background:#f97316;color:#fff;font:inherit;font-size:12px;cursor:pointer';
+  const BTN2 = BTN1.replace('#f97316', '#14246b').replace('solid #fff', 'solid #6d8cff');   // same shape, blue: secondary action
+
+  // Share the game: a link that opens it straight on the title screen (?play). Native share sheet, then clipboard, then legacy copy.
+  async function shareGame(b) {
+    const url = location.href.split(/[?#]/)[0] + '?play';
+    const data = { title: 'GC-RADIUS', text: 'I just got past ' + GOAL.toLocaleString('en-US') + ' points in GC-RADIUS, a Gradius-style game hidden in a portfolio. Can you beat it?', url };
+    const old = b.textContent, flash = msg => { b.textContent = msg; setTimeout(() => { b.textContent = old; }, 2200); };
+    try { if (navigator.share) { await navigator.share(data); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(url); return flash('LINK COPIED'); } } catch (e) {}
+    try {
+      const ta = document.createElement('textarea'); ta.value = url; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove();
+      if (ok) return flash('LINK COPIED');
+    } catch (e) {}
+    flash(url);
+  }
   const panel = document.createElement('div');
   panel.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(540px,92vw);max-height:92vh;overflow:auto;box-sizing:border-box;background:rgba(2,3,15,.94);border:3px solid #6d8cff;padding:20px;text-align:center;color:#fff;line-height:1.8;font-family:' + FONT + ';display:none';
-  panel.addEventListener('click', e => { if (e.target.dataset && e.target.dataset.resume) { e.target.blur(); resume(); } });
+  panel.addEventListener('click', e => {
+    const d = e.target.dataset || {};
+    if (d.resume) { e.target.blur(); resume(); }
+    else if (d.sharegame) { e.target.blur(); shareGame(e.target); }
+    else if (d.again) { e.target.blur(); newGame(); }
+  });
   ov.appendChild(panel);
   const links = `<a style="${BTN}" href="${EMAIL}">EMAIL ME</a><a style="${BTN}" href="${LINKEDIN}" target="_blank" rel="noopener">LINKEDIN</a>`;
+  // Shown on game over when the score passed GOAL. The game stays in 'over' mode underneath, so R / tap still retries.
+  function showGoalOver() {
+    panel.innerHTML =
+      `<div style="font-size:18px;color:#fde047;margin-bottom:10px">${st.score.toLocaleString('en-US')}!</div>
+       <div style="font-size:12px">CHALLENGE COMPLETE</div>
+       <div style="font-size:10px;color:#c7d2fe;margin:12px 0">You're an ace. Know someone who'd enjoy this? Send them the game.</div>
+       <button style="${BTN1}" data-sharegame="1">SHARE THE GAME</button><br>
+       <button style="${BTN2}" data-again="1">PLAY AGAIN</button>`;
+    panel.style.display = 'block';
+  }
   function setMode(m) {
     st.mode = m; touchT = null; for (const k in keys) keys[k] = false;
     if (m === 'pause') panel.innerHTML =
@@ -394,8 +468,9 @@ function startGame(viaCode) {
       `<div style="font-size:18px;color:#fde047;margin-bottom:10px">CONGRATS!</div>
        <div style="font-size:12px">BOSS DEFEATED</div>
        <div style="font-size:10px;color:#c7d2fe;margin:12px 0">Nice flying. If you like how I build things, let's talk.</div>
-       ${links}<br>
-       <button style="${BTN1}" data-resume="1">KEEP PLAYING ▶</button>`;
+       ${links}
+       <div style="font-size:8px;color:#94a3b8;margin:14px 0 2px">CHALLENGE: CAN YOU REACH ${GOAL.toLocaleString('en-US')}?</div>
+       <button style="${BTN1}" data-resume="1">TAKE THE CHALLENGE</button>`;
     panel.style.display = (m === 'pause' || m === 'congrats') ? 'block' : 'none';
   }
   function resume() { setMode('play'); last = performance.now(); }
@@ -413,8 +488,8 @@ function startGame(viaCode) {
     if (keys.ArrowRight || keys.d) s.x += sp * dt;
     if (keys.ArrowUp || keys.w) s.y -= sp * dt;
     if (keys.ArrowDown || keys.s) s.y += sp * dt;
-    if (touchT) { const k = Math.min(1, dt * 9); s.x += (touchT.x - s.x) * k; s.y += (touchT.y - s.y) * k; }
-    s.x = Math.max(24, Math.min(W - 24, s.x)); s.y = Math.max(24, Math.min(H - 70, s.y));
+    if (touchT) { const k = Math.min(1, dt * 9); s.x += (touchT.x + TOUCH_DX - s.x) * k; s.y += (touchT.y - TOUCH_DY - s.y) * k; }
+    s.x = Math.max(24, Math.min(W - 24, s.x)); s.y = Math.max(24, Math.min(H - 30, s.y));
     s.hist.unshift({ x: s.x, y: s.y }); if (s.hist.length > 60) s.hist.pop();
     s.inv -= dt; s.fire -= dt; s.banner -= dt;
     if ((keys[' '] || keys.z || touchT) && s.fire <= 0) shoot();
@@ -431,18 +506,18 @@ function startGame(viaCode) {
       }
       s.garun -= dt;
       if (s.garun <= 0) { s.garun = Math.max(1.4, 3.5 - s.score / 1500); s.foes.push({ type: 'garun', x: W + 30, y0: rnd(100, H - 190), y: 0, ph: rnd(0, 6), r: 14, hp: 1, sh: rnd(0.6, 1.8) }); }
-      if (s.score >= s.bossAt && s.foes.length < 3) s.boss = { type: 'boss', boss: true, x: W + 140, y: H / 2, r: 54, hp: 40 + 20 * s.bossN, max: 40 + 20 * s.bossN, sh: 1.5, ph: 0 }, s.foes.push(s.boss);
+      if (s.score >= s.bossAt && s.foes.length < 3) {
+        const kind = BOSSES[s.bossN % BOSSES.length], hp = Math.round((40 + 20 * s.bossN) * (kind === 'heavy' ? 1.5 : 1));
+        s.boss = { type: 'boss', boss: true, kind, x: W + 140, y: H / 2, r: 54, hp, max: hp, sh: 1.5, ph: 0, cyc: 0, mode: 'idle', t: 2.4 };
+        s.foes.push(s.boss);
+      }
     }
     for (const f of s.foes) {
-      if (f.type === 'fan') { f.x -= 230 * dt; f.y = f.y0 + Math.sin(f.x * 0.012) * 70; }
+      if (f.type === 'fan') { f.x -= 230 * kS() * dt; f.y = f.y0 + Math.sin(f.x * 0.012) * 70; }
       else if (f.type === 'garun') {
-        f.x -= 250 * dt; f.ph += dt * 4; f.y = f.y0 + Math.sin(f.ph) * 70;
-        f.sh -= dt; if (f.sh <= 0 && f.x < W - 40 && f.x > s.x + 150) { f.sh = 99; const a = Math.atan2(s.y - f.y, s.x - f.x); s.eb.push({ x: f.x, y: f.y, vx: Math.cos(a) * 230, vy: Math.sin(a) * 230 }); }
-      } else {
-        if (f.x > W - 170) f.x -= 90 * dt; else { f.ph += dt; f.y = H / 2 - 20 + Math.sin(f.ph * 0.9) * (H / 2 - 150); }
-        f.sh -= dt;
-        if (f.sh <= 0 && f.x <= W - 170) { f.sh = 1.2; const a0 = Math.atan2(s.y - f.y, s.x - f.x); for (const da of [-0.3, 0, 0.3]) s.eb.push({ x: f.x - 40, y: f.y, vx: Math.cos(a0 + da) * 260, vy: Math.sin(a0 + da) * 260 }); }
-      }
+        f.x -= 250 * kS() * dt; f.ph += dt * 4; f.y = f.y0 + Math.sin(f.ph) * 70;
+        f.sh -= dt; if (f.sh <= 0 && f.x < W - 40 && f.x > s.x + 150) { f.sh = 99; const a = Math.atan2(s.y - f.y, s.x - f.x); s.eb.push({ x: f.x, y: f.y, vx: Math.cos(a) * 230 * kS(), vy: Math.sin(a) * 230 * kS() }); }
+      } else bossAI(f, dt);
       if (f.x < -50 && !f.boss) { f.dead = true; if (f.w) f.w.esc = true; }
     }
     for (const f of s.foes) {
@@ -458,7 +533,7 @@ function startGame(viaCode) {
     }
     for (const f of s.foes) if (!f.dead && Math.abs(f.x - s.x) < f.r + 12 && Math.abs(f.y - s.y) < f.r + 8) { if (!f.boss) kill(f); hurt(); }
     s.foes = s.foes.filter(f => !f.dead);
-    for (const b of s.eb) { b.x += b.vx * dt; b.y += b.vy * dt; if (Math.hypot(b.x - s.x, b.y - s.y) < 12) { b.x = -999; hurt(); } }
+    for (const b of s.eb) { b.x += b.vx * dt; b.y += b.vy * dt; if (Math.hypot(b.x - s.x, b.y - s.y) < 9 + (b.r || 3)) { b.x = -999; hurt(); } }
     s.eb = s.eb.filter(b => b.x > -50 && b.x < W + 50 && b.y > -50 && b.y < H + 50);
     for (const c of s.caps) { c.x -= 70 * dt; c.ph += dt * 4; c.y += Math.sin(c.ph) * 20 * dt; if (Math.hypot(c.x - s.x, c.y - s.y) < 30) { c.dead = true; s.sel = (s.sel + 1) % 6; } }
     s.caps = s.caps.filter(c => !c.dead && c.x > -30);
@@ -497,14 +572,17 @@ function startGame(viaCode) {
         if (f.type === 'fan') { const col = f.w.red ? '#ef4444' : '#60a5fa'; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(f.x, f.y, 13, 0, 7); ctx.stroke(); const a = s.t * 9 + f.x * 0.02; ctx.beginPath(); ctx.moveTo(f.x + Math.cos(a) * 13, f.y + Math.sin(a) * 13); ctx.lineTo(f.x - Math.cos(a) * 13, f.y - Math.sin(a) * 13); ctx.stroke(); }
         else if (f.type === 'garun') { poly([[-14, 0], [10, -12], [4, 0], [10, 12]], f.x, f.y, '#34d399'); poly([[-4, -3], [4, 0], [-4, 3]], f.x, f.y, '#064e3b'); }
         else {
-          poly([[-56, 0], [-30, -30], [40, -36], [56, -12], [56, 12], [40, 36], [-30, 30]], f.x, f.y, '#3b4a78');
-          poly([[-56, 0], [-30, -14], [-30, 14]], f.x, f.y, '#1e2a52');
+          const look = BOSS_LOOK[f.kind] || BOSS_LOOK.core;
+          if (f.mode === 'warn') { ctx.fillStyle = Math.floor(s.t * 14) % 2 ? 'rgba(239,68,68,.35)' : 'rgba(239,68,68,.12)'; ctx.fillRect(0, f.y - 14, f.x, 28); }
+          poly([[-56, 0], [-30, -30], [40, -36], [56, -12], [56, 12], [40, 36], [-30, 30]], f.x, f.y, look[0]);
+          poly([[-56, 0], [-30, -14], [-30, 14]], f.x, f.y, look[1]);
+          ctx.fillStyle = '#cbd5e1'; ctx.textAlign = 'center'; ctx.font = `${fs - 1}px ${FONT}`; ctx.fillText((f.kind || 'core').toUpperCase(), f.x, f.y - 64); ctx.font = `${fs}px ${FONT}`;
           ctx.fillStyle = Math.floor(s.t * 6) % 2 ? '#ef4444' : '#fca5a5'; ctx.beginPath(); ctx.arc(f.x - 20, f.y, 12, 0, 7); ctx.fill();
           ctx.fillStyle = '#111'; ctx.fillRect(f.x - 40, f.y - 52, 80, 6); ctx.fillStyle = '#ef4444'; ctx.fillRect(f.x - 40, f.y - 52, 80 * f.hp / f.max, 6);
         }
       }
       ctx.fillStyle = '#fde047'; for (const b of s.bullets) { ctx.fillStyle = b.pierce ? '#7dd3fc' : '#fde047'; ctx.fillRect(b.x - b.w / 2, b.y - 1.5, b.w, b.pierce ? 4 : 3); }
-      ctx.fillStyle = '#fb7185'; for (const b of s.eb) ctx.fillRect(b.x - 3, b.y - 3, 6, 6);
+      ctx.fillStyle = '#fb7185'; for (const b of s.eb) { if (b.r > 3) { ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); } else ctx.fillRect(b.x - 3, b.y - 3, 6, 6); }
       for (const p of optPos()) { ctx.fillStyle = '#f97316'; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 7); ctx.fill(); ctx.fillStyle = '#fff7ed'; ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, 7); ctx.fill(); }
       if (s.mode !== 'over' && (s.inv <= 0 || Math.floor(s.t * 14) % 2)) {
         drawShip(s.x, s.y, s.t, true);
@@ -515,6 +593,7 @@ function startGame(viaCode) {
       ctx.textAlign = 'left'; ctx.fillStyle = '#fff'; ctx.fillText('1P', 14, 22);
       ctx.fillStyle = '#fde047'; ctx.fillText(String(s.score).padStart(7, '0'), 14 + fs * 3, 22);
       ctx.fillStyle = '#ef4444'; ctx.fillText('HI', 14 + fs * 12, 22); ctx.fillStyle = '#fde047'; ctx.fillText(String(Math.max(best, s.score)).padStart(7, '0'), 14 + fs * 15, 22);
+      if (s.congrats) { ctx.textAlign = 'right'; ctx.fillStyle = s.score >= GOAL ? '#4ade80' : '#94a3b8'; ctx.fillText(s.score >= GOAL ? `${GOAL} REACHED!` : `GOAL ${GOAL}`, W - 14, 22); ctx.textAlign = 'left'; }
       for (let i = 0; i < s.lives - 1; i++) drawShip(26 + i * 38, 48, 0, false);
       if (s.banner > 0) { ctx.textAlign = 'center'; ctx.font = `${fs + 3}px ${FONT}`; ctx.fillStyle = Math.floor(s.t * 10) % 2 ? '#fde047' : '#fb7185'; ctx.fillText('KONAMI POWER-UP!', W / 2, H / 2 - 60); ctx.font = `${fs}px ${FONT}`; }
       // power meter
@@ -555,6 +634,8 @@ function startGame(viaCode) {
     step(dt); draw(now); raf = requestAnimationFrame(loop);
   })(last);
 }
+// A shared game link (…/?play) opens GC-RADIUS straight on its title screen.
+if (/[?&]play(&|=|$)/.test(location.search)) startGame();
 </script>
 </body>
 </html>
