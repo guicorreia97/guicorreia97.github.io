@@ -115,11 +115,15 @@ h2::after { content: ""; display: block; width: 44px; height: 3px; margin-top: 8
 
 footer { padding: 48px 0; color: var(--muted); font-size: .85rem; }
 
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s, transform .6s; }
-.reveal.in { opacity: 1; transform: none; }
+.reveal {
+  opacity: 0; filter: blur(6px);
+  transform: perspective(1000px) translate3d(0, 90px, -260px); transform-origin: 50% 50%;
+  transition: opacity 1s ease, filter 1s ease, transform 1.1s cubic-bezier(.16,1,.3,1);
+}
+.reveal.in { opacity: 1; filter: none; transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .hero::before { animation: none; }
-  .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal { opacity: 1; filter: none; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
 
@@ -182,3 +186,19 @@ button.btn { font: inherit; cursor: pointer; }
 }
 
 h2 .note { color: color-mix(in srgb, var(--muted) 55%, var(--bg)); font-weight: 400; font-size: .7em; white-space: nowrap; }
+
+/* 3D depth: layered shadows, pointer tilt with a moving highlight, hero parallax.
+   .tilt is added by JS only for a mouse pointer and no reduced-motion preference. */
+.card, .stat, .skills div { box-shadow: 0 1px 0 rgba(255,255,255,.04) inset, 0 2px 4px rgba(0,0,0,.12), 0 14px 28px -14px rgba(0,0,0,.45); }
+.tilt, .reveal.in.tilt {
+  --rx: 0deg; --ry: 0deg; --lift: 0px;
+  transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--lift));
+  transform-style: preserve-3d; will-change: transform;
+  transition: transform .12s ease-out, border-color .2s, box-shadow .2s;
+}
+.tilt:hover { --lift: -6px; border-color: var(--accent); box-shadow: 0 24px 40px -18px color-mix(in srgb, var(--accent) 50%, transparent), 0 8px 16px -8px rgba(0,0,0,.5); }
+.tilt.leaving, .reveal.in.tilt.leaving { transition: transform .45s cubic-bezier(.2,.7,.2,1), border-color .2s, box-shadow .2s; }
+.tilt > * { transform: translateZ(18px); }
+
+.hero .wrap { position: relative; }
+@media (max-width: 700px) { 

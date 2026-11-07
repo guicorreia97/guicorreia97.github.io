@@ -37,8 +37,15 @@
     <div class="stat"><b>5,000+</b><span>Users</span></div>
     <div class="stat"><b>50%+</b><span>less manual work sorting test failures, by automating bug reports</span></div>
     <div class="stat"><b>5+</b><span>Years in software engineering</span></div>
-    <div class="stat"><b>1st</b><span>SAP's Hack2Build hackathon for business AI</span></div>
+    <div class="stat"><b>1st Place</b><span>SAP's Hack2Build hackathon for business AI</span></div>
   </div>
+
+  <section id="clients">
+    <h2>Clients I've worked with <span class="note">(some omitted)</span></h2>
+    <ul class="chips reveal" id="clientlist">
+      <li>Deloitte</li><li>Volkswagen</li><li>Volvo Cars</li><li>European Commission</li><li>EDP</li><li>Worten</li>
+    </ul>
+  </section>
 
   <section>
     <h2>About</h2>
@@ -85,7 +92,7 @@
       <article class="card reveal">
         <h3>Accounting assistant, SAP Hack2Build winner</h3>
         <p class="role">Hackathon team: the document-lookup logic</p>
-        <p>Prototype that suggests how to record a transaction in a company's accounting system by looking up that company's own accounting guidelines. The guidelines lived in SAP's database with its built-in search-by-meaning feature, so no separate search tool was needed. Won the SAP Hack2Build hackathon for business AI.</p>
+        <p>Prototype that proposes how to post a transaction in an ERP by retrieving the company's own accounting guidelines. Retrieval ran as vector search inside SAP HANA Cloud, so there was no separate vector store to run or keep in sync. Won the SAP Hack2Build hackathon for business AI.</p>
         <ul class="tags"><li>RAG</li><li>SAP HANA Cloud</li><li>Azure OpenAI</li></ul>
       </article>
 
@@ -127,15 +134,9 @@
     </div>
   </section>
 
-  <section id="clients">
-    <h2>Clients I've worked with <span class="note">(some omitted)</span></h2>
-    <ul class="chips reveal" id="clientlist">
-      <li>Deloitte</li><li>Volkswagen</li><li>Volvo Cars</li><li>European Commission</li><li>EDP</li><li>Worten</li>
-    </ul>
-  </section>
 </main>
 
-<footer><div class="wrap">© Guilherme Correia<div class="hint">psst: tap the GC in the top-left 5 times. Or, if you know the code, ↑ ↑ ↓ ↓ ← → ← → B A</div></div></footer>
+<footer><div class="wrap">© Guilherme Correia<div class="hint">psst: tap the GC in the top-left multiple times. Or, if you know the code, ↑ ↑ ↓ ↓ ← → ← → B A</div></div></footer>
 <div class="toast" id="toast" role="status"></div>
 <div class="dock" aria-label="Quick contact">
   <a href="mailto:guilherme_crespo_correia@outlook.com">✉<span>Email</span></a>
@@ -199,7 +200,12 @@ btn.addEventListener('click', () => {
   try { localStorage.setItem('theme', next); } catch (e) {}
   sync();
 });
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
+const io = new IntersectionObserver(es => es.filter(e => e.isIntersecting).forEach((e, i) => {
+  const el = e.target; io.unobserve(el);
+  el.style.transitionDelay = (i * 110) + 'ms'; // items entering together fade in one after another
+  el.classList.add('in');
+  setTimeout(() => { el.style.transitionDelay = ''; el.dispatchEvent(new Event('revealdone')); }, 1300 + i * 110);
+}), { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
 const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -636,6 +642,26 @@ function startGame(viaCode) {
 }
 // A shared game link (…/?play) opens GC-RADIUS straight on its title screen.
 if (/[?&]play(&|=|$)/.test(location.search)) startGame();
+
+// 3D: tilt cards toward the mouse, and nudge the hero glow. Mouse only, skipped for reduced motion.
+if (matchMedia('(hover: hover) and (pointer: fine)').matches && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('.card, .stat, .skills div').forEach(el => {
+    // wait for the fade-in to finish, so the tilt styles don't cut it short
+    if (el.classList.contains('reveal')) el.addEventListener('revealdone', () => el.classList.add('tilt'), { once: true });
+    else el.classList.add('tilt');
+    el.addEventListener('pointermove', e => {
+      const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+      const k = el.classList.contains('card') ? .5 : 1; // big project cards tilt less
+      el.classList.remove('leaving');
+      el.style.setProperty('--ry', ((x - .5) * 6 * k).toFixed(2) + 'deg');
+      el.style.setProperty('--rx', ((.5 - y) * 5 * k).toFixed(2) + 'deg');
+    });
+    el.addEventListener('pointerleave', () => {
+      el.classList.add('leaving');
+      ['--rx', '--ry'].forEach(p => el.style.setProperty(p, '0deg'));
+    });
+  });
+}
 </script>
 </body>
 </html>
